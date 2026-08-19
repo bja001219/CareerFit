@@ -1,0 +1,57 @@
+# ── Python ────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+venv/
+env/
+ENV/
+build/
+dist/
+*.egg-info/
+.eggs/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+coverage.xml
+
+# ── Node ──────────────────────────────────────────────────
+node_modules/
+dist/
+.vite/
+*.tsbuildinfo
+vite.config.d.ts
+vite.config.js
+
+# ── Vite / Frontend build ────────────────────────────────
+frontend/dist/
+frontend/coverage/
+
+# ── Local data & secrets ─────────────────────────────────
+.env
+.env.local
+.env.*.local
+
+# ── SQLite ────────────────────────────────────────────────
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
+
+# ── User uploads (all persistent artifacts) ──────────────
+backend/uploads/
+backend/careerfit.db
+
+# ── IDE / OS ─────────────────────────────────────────────
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# ── Session tooling ──────────────────────────────────────
+.omc/
+.claude/
