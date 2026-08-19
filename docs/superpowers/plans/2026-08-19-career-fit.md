@@ -13,11 +13,11 @@
 
 ## Current Status
 
-- **Current Phase**: Phase 3 진입 대기 (Career Documents — Persistence + Security)
-- **Last Completed**: Phase 2 backend foundation. 7 pytest green. Uploads 디렉토리 lifespan 자동 생성.
-- **Currently Working On**: (다음 단계) `services/document_service.py`
-- **Next**: Phase 3 전체 (PDF/DOCX/TXT 추출 + 업로드 API + 12 tests)
-- **Known Issues**: 없음. uploads dir 은 `database.init_db()` 가 자동 생성함.
+- **Current Phase**: Phase 4 진입 대기 (Analyzer Factory + Mock)
+- **Last Completed**: Phase 3 Career Documents. **26/26 pytest green**. Persistence 검증됨.
+- **Currently Working On**: (다음) `services/analyzer_factory.py` + `providers/mock.py`
+- **Next**: Phase 4 (analyzer_factory + mock provider + client cache) → Phase 5 (Career Profile)
+- **Known Issues**: 없음. Test infra 로 in-memory SQLite `StaticPool` 사용 (여러 connection 이 같은 DB 공유).
 
 ---
 
@@ -91,28 +91,36 @@
 
 ## Phase 3 — Career Documents (Persistence + Security)
 
-- [ ] `services/document_service.py` — save + extract text (PDF / DOCX / TXT)
-- [ ] `services/document_service.py` — sanitize whitelist `[A-Za-z0-9._가-힣\-]+`, NFC, 200 chars max
-- [ ] `services/document_service.py` — path-traversal 방지 (`is_relative_to`)
-- [ ] `services/document_service.py` — Content-Length 검사 + 스트리밍 size guard
-- [ ] `api/career_documents.py` — POST /api/career/documents
-- [ ] `api/career_documents.py` — GET /api/career/documents
-- [ ] `api/career_documents.py` — DELETE with `?force=` (block if referenced by profile)
-- [ ] `api/career_documents.py` — POST /api/career/documents/{id}/replace (atomic §17)
-- [ ] Sample dummy fixtures: `tests/fixtures/sample_resume.pdf`, `sample_career_desc.docx`, `sample_portfolio.txt`
-- [ ] `test_upload_document_persists_and_extracts` (PDF)
-- [ ] `test_upload_document_persists_and_extracts` (DOCX)
-- [ ] `test_upload_document_persists_and_extracts` (TXT)
-- [ ] `test_upload_rejects_scanned_pdf`
-- [ ] `test_upload_rejects_unknown_extension`
-- [ ] `test_upload_rejects_over_size_limit`
-- [ ] `test_upload_rejects_path_traversal_filename`
-- [ ] `test_upload_sanitize_preserves_korean`
-- [ ] `test_upload_survives_restart`
-- [ ] `test_replace_document_atomic_success`
-- [ ] `test_replace_document_atomic_rollback_on_db_failure`
-- [ ] `test_delete_referenced_career_document_blocked`
-- [ ] `test_delete_referenced_career_document_forced_marks_orphan`
+- [x] `services/document_service.py` — save + extract text (PDF / DOCX / TXT)
+- [x] `services/document_service.py` — sanitize whitelist `[A-Za-z0-9._가-힣\-]+`, NFC, 200 chars max
+- [x] `services/document_service.py` — cross-platform path-traversal 방지 (`/` + `\\` 분리 + `is_relative_to`)
+- [x] `services/document_service.py` — size guard + MIN_EXTRACTED_CHARS 200 (scanned PDF 자동 거부)
+- [x] `services/document_service.py` — `save_job_posting_pdf` (Phase 6 대비 helper 미리 배치)
+- [x] `services/document_service.py` — `replace_document_atomic` helper (DB 커밋 후 old file unlink)
+- [x] `api/career_documents.py` — POST /api/career/documents (unique(kind) enforced by delete+insert)
+- [x] `api/career_documents.py` — GET /api/career/documents
+- [x] `api/career_documents.py` — DELETE with `?force=true` (block if referenced by profile)
+- [x] `api/career_documents.py` — POST /api/career/documents/{id}/replace (atomic §17)
+- [x] Sample fixtures: in-memory `make_minimal_pdf` / `make_minimal_docx` / `make_minimal_txt` in conftest — no binary blobs committed
+- [x] `test_upload_document_persists_and_extracts` PDF/DOCX/TXT (3 케이스)
+- [x] `test_upload_rejects_scanned_pdf`
+- [x] `test_upload_rejects_unknown_extension`
+- [x] `test_upload_rejects_over_size_limit`
+- [x] `test_upload_rejects_bad_kind`
+- [x] `test_sanitize_filename_blocks_path_traversal` (3 케이스: `/`, `\\`, mixed)
+- [x] `test_sanitize_filename_preserves_korean`
+- [x] `test_sanitize_filename_caps_length` (200 chars)
+- [x] `test_sanitize_filename_returns_default_for_empty`
+- [x] `test_list_documents_returns_all_kinds`
+- [x] `test_upload_replaces_previous_of_same_kind` (unique(kind) 검증)
+- [x] `test_delete_removes_row_and_file`
+- [x] `test_delete_missing_returns_404`
+- [x] `test_delete_referenced_career_document_blocked` (Finding 7)
+- [x] `test_delete_referenced_career_document_forced_marks_orphan` (Finding 7)
+- [x] `test_replace_document_atomic_success`
+- [x] `test_upload_survives_restart` — 별도 file-backed SQLite 로 process boundary 시뮬레이션
+- [x] Fixture 인프라 fix: in-memory SQLite 는 `StaticPool` 사용해야 여러 connection 이 같은 DB 공유
+- [x] Fixture 인프라 fix: `tmp_uploads_root` fixture 로 uploads 를 tmp_path 로 격리
 - [ ] commit: `feat(backend): persistent career documents with pdf/docx/txt extraction + security`
 
 ## Phase 4 — Analyzer Factory + Mock
@@ -363,30 +371,29 @@
 
 ### Last Updated
 
-2026-08-19 (Phase 2 완료 직후)
+2026-08-19 (Phase 3 완료 직후)
 
 ### Current Phase
 
-Phase 3 — Career Documents (Persistence + Security).
+Phase 4 — Analyzer Factory + Mock.
 
 ### Last Completed Task
 
-- [x] Phase 2 backend foundation 전체
-- [x] 7 pytest green (health 3 + config 4)
-- [x] init_db 검증 (4 tables + 4 upload subdirs 자동 생성)
+- [x] Phase 3 Career Documents 전체
+- [x] 26/26 pytest green (health 3 + config 4 + career_docs 19)
+- [x] Test infra 개선: `StaticPool` in-memory SQLite, `tmp_uploads_root`, in-memory PDF/DOCX/TXT 생성기
 
 ### Next Task
 
-- [ ] `backend/app/services/document_service.py`
-  - PDF (pypdf) / DOCX (python-docx) / TXT (encoding auto-detect) 추출
-  - sanitize whitelist `[A-Za-z0-9._가-힣\-]+`, NFC, max 200 chars
-  - path-traversal 방지 (`is_relative_to`)
-  - Content-Length 검사 + 스트리밍 size guard
-- [ ] `backend/app/api/career_documents.py`
-  - POST / GET / DELETE (force flag) / POST replace (atomic §17)
-- [ ] Sample dummy fixtures 3개 (`tests/fixtures/`)
-- [ ] 12개 pytest — SPEC §20 Phase 3 목록
-- [ ] commit: `feat(backend): persistent career documents with pdf/docx/txt extraction + security`
+- [ ] `backend/app/services/providers/base.py` (Analyzer Protocol — Career/Job/Fit)
+- [ ] `backend/app/services/providers/mock.py` (결정론 sample 응답)
+- [ ] `backend/app/services/analyzer_factory.py` (build_career/build_job/build_fit + fallback + client cache)
+- [ ] 4개 pytest:
+  - `test_analyzer_factory_returns_mock_when_mock_mode`
+  - `test_analyzer_factory_falls_back_when_missing_key_with_reason`
+  - `test_gemini_client_cached_per_key`
+  - `test_reset_client_cache_forces_new_client`
+- [ ] commit: `feat(backend): analyzer factory with mock fallback and cache invalidation`
 
 ### Important Decisions (요약)
 
