@@ -6,7 +6,6 @@ build-backend = "setuptools.build_meta"
 name = "careerfit-backend"
 version = "0.2.0"
 description = "CareerFit — Career × Job Fit Analyzer (backend)"
-readme = "../README.md"
 requires-python = ">=3.11"
 license = { text = "MIT" }
 authors = [{ name = "bja001219", email = "bja001219@gmail.com" }]

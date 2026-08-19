@@ -13,11 +13,11 @@
 
 ## Current Status
 
-- **Current Phase**: Phase 2 진입 대기 (Backend Foundation)
-- **Last Completed**: Phase 1 — commit `b716eac`, GitHub push
-- **Currently Working On**: (다음 세션이 이어감) Phase 2 첫 항목 = `app/config.py`
-- **Next**: Phase 2 전체 (config → database → models → schemas → health/errors router → tests)
-- **Known Issues**: `backend/uploads/.gitkeep` 은 gitignore 규칙으로 track 되지 않음 → Phase 2 lifespan 에서 `uploads/` 디렉토리 자동 생성 로직 필요 (`document_service.save_upload` 진입점에서 `Path.mkdir(parents=True, exist_ok=True)`).
+- **Current Phase**: Phase 3 진입 대기 (Career Documents — Persistence + Security)
+- **Last Completed**: Phase 2 backend foundation. 7 pytest green. Uploads 디렉토리 lifespan 자동 생성.
+- **Currently Working On**: (다음 단계) `services/document_service.py`
+- **Next**: Phase 3 전체 (PDF/DOCX/TXT 추출 + 업로드 API + 12 tests)
+- **Known Issues**: 없음. uploads dir 은 `database.init_db()` 가 자동 생성함.
 
 ---
 
@@ -64,21 +64,29 @@
 
 ## Phase 2 — Backend Foundation
 
-- [ ] `app/config.py` (Settings dataclass + env, `mode`/`effective_mode`/`fallback_reason` derivations)
-- [ ] `app/config.py` — weight-sum-to-1 boot validation (raises ConfigurationError)
-- [ ] `app/database.py` (SQLAlchemy engine + Base + init_db, `isolation_level="SERIALIZABLE"`)
-- [ ] `app/models/career_document.py` (Unique kind, restricted enum, `DateTime(timezone=True)`)
-- [ ] `app/models/career_profile.py` (**is_current 없음** — created_at DESC 로 유도)
-- [ ] `app/models/job_posting.py` (source_type/stored_path 포함)
-- [ ] `app/models/fit_analysis.py` (UNIQUE(profile_id, posting_id), ON DELETE CASCADE FKs)
-- [ ] `app/models/errors.py` (InvalidUploadError, PayloadTooLargeError, EmptyExtractedTextError, UrlExtractionError, AnalysisFailedError, MissingCredentialsError, DuplicateAnalysisError, ReferencedDocumentError, NotFoundError, ConfigurationError)
-- [ ] `app/schemas/` — Pydantic I/O + LLM 응답 스키마 (Career/Job/Fit)
-- [ ] `app/api/health.py` (`/api/health` returns `mode`, `effective_mode`, `provider`, `model`, `fallback_reason`)
-- [ ] `app/api/errors.py` (global exception → JSON, no stack trace)
-- [ ] `app/main.py` (FastAPI + CORS from env list + include_router + lifespan)
-- [ ] pytest 세팅 (`conftest.py`, in-memory DB 오버라이드, TestClient)
-- [ ] `test_health_reports_effective_mock_when_key_missing` 통과
-- [ ] `test_config_rejects_weights_not_summing_to_one` 통과
+- [x] `app/config.py` (Settings dataclass + env, `mode`/`effective_mode`/`active_provider`/`active_model`/`fallback_reason` derivations)
+- [x] `app/config.py` — weight-sum-to-1 boot validation (raises `ConfigurationError`)
+- [x] `app/database.py` (SQLAlchemy engine + Base + `init_db`, PRAGMA foreign_keys=ON, uploads dir auto-create)
+- [x] `app/models/career_document.py` (Unique kind, `DateTime(timezone=True)`)
+- [x] `app/models/career_profile.py` (**is_current 없음** — created_at DESC 로 유도)
+- [x] `app/models/job_posting.py` (source_type/stored_path 포함)
+- [x] `app/models/fit_analysis.py` (UNIQUE(profile_id, posting_id), ON DELETE CASCADE FKs)
+- [x] `app/models/errors.py` (10 typed errors with status codes)
+- [x] `app/schemas/health.py` — Phase 2 만 health 응답. Career/Job/Fit 스키마는 각 Phase 에서 추가.
+- [x] `app/api/health.py` (`/api/health` returns mode/effective_mode/provider/model/fallback_reason)
+- [x] `app/api/errors.py` (global exception → JSON, no stack trace, DuplicateAnalysisError 는 existing_id 함께 반환)
+- [x] `app/main.py` (`create_app()` factory + CORS from env list + include_router + lifespan)
+- [x] pytest 세팅 (`conftest.py` — env 격리, in-memory DB 오버라이드, TestClient fixture)
+- [x] `test_health_default_is_mock` 통과
+- [x] `test_health_reports_effective_mock_when_key_missing` 통과
+- [x] `test_health_reports_live_when_key_present` 통과
+- [x] `test_default_settings_construct_without_error` 통과
+- [x] `test_config_rejects_weights_not_summing_to_one` 통과
+- [x] `test_config_accepts_explicit_weight_override_that_still_sums` 통과
+- [x] `test_active_model_reflects_effective_mode` 통과
+- [x] venv 생성 + `pip install -e ".[dev]"` 성공 (fastapi 0.141, pydantic 2.13, sqlalchemy 2.0.52, pytest 9.1.1 등)
+- [x] `init_db()` 검증: 4 테이블 생성 확인, uploads/{career/{resume,career_desc,portfolio},job} 자동 생성 확인
+- [x] `pyproject.toml` fix: `readme = "../README.md"` 제거 (setuptools 가 backend 밖 파일 접근 거부)
 - [ ] commit: `feat(backend): scaffolding + health endpoint with effective_mode reporting`
 
 ## Phase 3 — Career Documents (Persistence + Security)
@@ -355,28 +363,30 @@
 
 ### Last Updated
 
-2026-08-19 (Phase 1 완료 직후)
+2026-08-19 (Phase 2 완료 직후)
 
 ### Current Phase
 
-Phase 2 — Backend Foundation.
+Phase 3 — Career Documents (Persistence + Security).
 
 ### Last Completed Task
 
-- [x] Phase 1: git init, .gitignore, .env.example (MOCK_MODE=true 안전 기본값), README skeleton, backend / frontend 뼈대, 첫 commit `b716eac`, GitHub repo 생성, `git push -u origin main`
-- [x] 22 files inserted (2315 lines) — SPEC/PLAN/Review + backend skeleton + frontend Vite 뼈대
+- [x] Phase 2 backend foundation 전체
+- [x] 7 pytest green (health 3 + config 4)
+- [x] init_db 검증 (4 tables + 4 upload subdirs 자동 생성)
 
 ### Next Task
 
-- [ ] Phase 2 진입 · 첫 항목: `backend/app/config.py` (Settings dataclass + env)
-  - `mode` / `effective_mode` / `provider` / `fallback_reason` 속성
-  - weight-sum-to-1 boot validation → `ConfigurationError`
-- [ ] `backend/app/database.py` (SQLAlchemy engine + Base + init_db, `isolation_level="SERIALIZABLE"`)
-- [ ] ORM 모델 4개 (career_document, career_profile, job_posting, fit_analysis) — SPEC §8
-- [ ] Pydantic schemas
-- [ ] `/api/health` 확장 (effective_mode + fallback_reason)
-- [ ] 첫 두 test 통과 (`test_health_reports_effective_mock_when_key_missing`, `test_config_rejects_weights_not_summing_to_one`)
-- [ ] commit: `feat(backend): scaffolding + health endpoint with effective_mode reporting`
+- [ ] `backend/app/services/document_service.py`
+  - PDF (pypdf) / DOCX (python-docx) / TXT (encoding auto-detect) 추출
+  - sanitize whitelist `[A-Za-z0-9._가-힣\-]+`, NFC, max 200 chars
+  - path-traversal 방지 (`is_relative_to`)
+  - Content-Length 검사 + 스트리밍 size guard
+- [ ] `backend/app/api/career_documents.py`
+  - POST / GET / DELETE (force flag) / POST replace (atomic §17)
+- [ ] Sample dummy fixtures 3개 (`tests/fixtures/`)
+- [ ] 12개 pytest — SPEC §20 Phase 3 목록
+- [ ] commit: `feat(backend): persistent career documents with pdf/docx/txt extraction + security`
 
 ### Important Decisions (요약)
 
