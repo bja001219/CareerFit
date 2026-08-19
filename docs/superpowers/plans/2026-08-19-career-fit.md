@@ -13,11 +13,11 @@
 
 ## Current Status
 
-- **Current Phase**: Phase 1 — Repo Skeleton (거의 완료: commit + GitHub push 만 남음)
-- **Last Completed**: Backend/Frontend skeleton 파일 작성 + Python syntax 검증
-- **Currently Working On**: 첫 commit + GitHub repo 생성 + push
-- **Next**: Phase 2 (Backend foundation)
-- **Known Issues**: `backend/uploads/.gitkeep` 은 gitignore 규칙으로 track 되지 않음 → Phase 2 lifespan 에서 `uploads/` 디렉토리 자동 생성 로직 필요.
+- **Current Phase**: Phase 2 진입 대기 (Backend Foundation)
+- **Last Completed**: Phase 1 — commit `b716eac`, GitHub push
+- **Currently Working On**: (다음 세션이 이어감) Phase 2 첫 항목 = `app/config.py`
+- **Next**: Phase 2 전체 (config → database → models → schemas → health/errors router → tests)
+- **Known Issues**: `backend/uploads/.gitkeep` 은 gitignore 규칙으로 track 되지 않음 → Phase 2 lifespan 에서 `uploads/` 디렉토리 자동 생성 로직 필요 (`document_service.save_upload` 진입점에서 `Path.mkdir(parents=True, exist_ok=True)`).
 
 ---
 
@@ -57,10 +57,10 @@
 - [x] Frontend 프로젝트 뼈대 (`frontend/package.json`, `vite.config.ts`, `tailwind.config.js`, `postcss.config.js`, `index.html`, `src/main.tsx`, `src/index.css`, tsconfig 2개, setup.ts, vite-env.d.ts)
 - [x] `docs/` 링크 유효성 확인 (SPEC / PLAN / Review 상호 참조 OK)
 - [x] Python 파일 syntax 검증 (`ast.parse` 전체 통과)
-- [ ] 첫 commit: `chore: bootstrap CareerFit skeleton (spec v0.2 + plan v0.2 + empty frontend/backend)`
-- [ ] GitHub repo `bja001219/CareerFit` 생성 (public, no template)
-- [ ] `git remote add origin` + `git push -u origin main`
-- [ ] Session Handoff 갱신
+- [x] 첫 commit: `b716eac` — chore: bootstrap CareerFit skeleton (spec v0.2 + plan v0.2 + empty frontend/backend)
+- [x] GitHub repo 생성: https://github.com/bja001219/CareerFit (public)
+- [x] `git push -u origin main` 성공
+- [x] Session Handoff 갱신
 
 ## Phase 2 — Backend Foundation
 
@@ -355,24 +355,28 @@
 
 ### Last Updated
 
-2026-08-19 (Grill Me #1 반영 직후)
+2026-08-19 (Phase 1 완료 직후)
 
 ### Current Phase
 
-Phase 1 — Repo Skeleton 진입 대기.
+Phase 2 — Backend Foundation.
 
 ### Last Completed Task
 
-- [x] SPEC v0.2.0 반영
-- [x] PLAN v0.2.0 반영
-- [x] Grill Me #1 review 파일에 결정 로그 append
+- [x] Phase 1: git init, .gitignore, .env.example (MOCK_MODE=true 안전 기본값), README skeleton, backend / frontend 뼈대, 첫 commit `b716eac`, GitHub repo 생성, `git push -u origin main`
+- [x] 22 files inserted (2315 lines) — SPEC/PLAN/Review + backend skeleton + frontend Vite 뼈대
 
 ### Next Task
 
-- [ ] Phase 1 첫 항목부터: `git init` @ `C:\portf\CareerFit`
-- [ ] `.gitignore` / `.env.example` / README skeleton
-- [ ] Backend / Frontend 뼈대 파일
-- [ ] 첫 commit + GitHub repo 생성 + push
+- [ ] Phase 2 진입 · 첫 항목: `backend/app/config.py` (Settings dataclass + env)
+  - `mode` / `effective_mode` / `provider` / `fallback_reason` 속성
+  - weight-sum-to-1 boot validation → `ConfigurationError`
+- [ ] `backend/app/database.py` (SQLAlchemy engine + Base + init_db, `isolation_level="SERIALIZABLE"`)
+- [ ] ORM 모델 4개 (career_document, career_profile, job_posting, fit_analysis) — SPEC §8
+- [ ] Pydantic schemas
+- [ ] `/api/health` 확장 (effective_mode + fallback_reason)
+- [ ] 첫 두 test 통과 (`test_health_reports_effective_mock_when_key_missing`, `test_config_rejects_weights_not_summing_to_one`)
+- [ ] commit: `feat(backend): scaffolding + health endpoint with effective_mode reporting`
 
 ### Important Decisions (요약)
 
@@ -400,8 +404,9 @@ Phase 1 — Repo Skeleton 진입 대기.
 
 ### Git
 
-- 아직 git init 전. Phase 1 첫 commit 이후 이 섹션 갱신.
-- Remote 예정: `https://github.com/bja001219/CareerFit` (Phase 1 마지막에 생성)
+- Local repo: `C:\portf\CareerFit` (branch `main`)
+- Remote: https://github.com/bja001219/CareerFit (public)
+- Latest commit: `b716eac` chore: bootstrap CareerFit skeleton
 - GitHub CLI 인증 확인됨 (계정: bja001219, token scope: repo/workflow OK)
 
 ### Resume 명령어 (개발 재개용)
